@@ -1,0 +1,675 @@
+\documentclass[12pt, twoside]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titling}
+\usepackage{times} 
+\usepackage{fancyhdr}
+\usepackage{indentfirst}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
+\usepackage{caption} 
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{booktabs}      
+\usepackage{threeparttable}
+\usepackage{graphicx}
+
+
+
+\geometry{
+  a4paper,
+  top=2.5cm,
+  bottom=2.5cm,
+  inner=3cm,
+  outer=2cm,
+  bindingoffset=0cm
+}
+
+\onehalfspacing
+\setlength{\parindent}{1.25cm}
+\pagestyle{plain}
+\begin{document}
+
+
+
+
+
+\begin{titlepage}
+  \thispagestyle{empty}  
+
+  \centering
+
+  \includegraphics[width=0.7\textwidth]{SGH_logo.png}\par
+  \vspace{1cm}
+
+
+  % --- tytuł ---
+  {\Huge\bfseries Metody ekonometryczne - analiza zwrotów akcji PKN Orlen S.A 
+\par}
+
+
+
+
+  
+  \vspace{2cm}
+\begin{flushright}
+{\large Opracowanie: 
+\\
+Marek Polit 121564\\[3pt]
+}
+\end{flushright}
+
+
+
+\vfill
+
+  
+  
+  % --- data na dole ---
+  {\large \today}
+
+\end{titlepage}
+
+
+
+
+
+
+
+
+
+\tableofcontents
+\newpage
+
+\section{Wprowadzenie}
+Analiza zwrotów z akcji jest jednym z podstawowych narzędzi wykorzystywanych w ocenie opłacalności inwestycji na rynku kapitałowym. Obserwując, jak zmienia się cena akcji w czasie, inwestorzy oraz analitycy finansowi mogą lepiej zrozumieć, jakie czynniki wpływają na ich wartość i jakie ryzyko wiąże się z daną spółką. Szczególnie interesującym przypadkiem jest PKN Orlen, jedna z największych firm w Polsce i kluczowy podmiot w sektorze paliwowym. Ze względu na swoją skalę działalności oraz powiązania z globalnymi rynkami ropy naftowej i gazu, akcje tej spółki są podatne na wpływ wielu zmiennych ekonomicznych.
+
+Celem niniejszej analizy jest zbadanie, w jaki sposób różne czynniki — takie jak zmiany kursów walut, ceny surowców energetycznych czy sytuacja na rynku krajowym — wpływają na miesięczne stopy zwrotu z akcji PKN Orlen. W tym celu wykorzystane zostaną narzędzia ekonometrii, w szczególności modele liniowe oraz testy diagnostyczne. Analiza pozwoli ocenić, które zmienne mają istotny wpływ na zwroty z akcji, a także sprawdzić jakość dopasowania modelu do danych.
+
+Dzięki temu możliwe będzie lepsze zrozumienie mechanizmów kształtujących notowania PKN Orlen oraz ocena, czy i w jakim stopniu można przewidywać ich zmiany na podstawie dostępnych danych ekonomicznych.
+
+\section{Pozyskiwanie danych i konstrukcja zmiennych}
+
+W analizie wykorzystano dane miesięczne od 2000 roku do 2024 roku. Zmiennymi objaśniającymi były zarówno wskaźniki makroekonomiczne, jak i rynkowe oraz sektorowe. Wszystkie dane zostały przekształcone do formatu miesięcznego, połączone w jedną ramkę danych oraz przygotowane do dalszej obróbki ekonometrycznej. Poniżej przedstawiono zestaw zmiennych użytych w modelu:
+
+\begin{itemize}
+  \item \textit{PKN\_WA\_Close}\footnote{\url{https://finance.yahoo.com/quote/PKN.WA/history?p=PKN.WA}}  
+     
+     Zmienna objaśniana: cena zamknięcia akcji PKN Orlen na koniec każdego miesiąca.  
+     
+
+  \item \textit{Brent\_USD}\footnote{\url{https://fred.stlouisfed.org/series/POILBREUSDM}}  
+
+     Średniomiesięczna cena surowca Brent w USD za baryłkę.  
+     \\
+     Uzasadnienie: Cena Brent może obrazować generalne zmiany cen ropy naftowej, przy założeniu konkurencyjności cen
+
+  \newpage   
+  \item \textit{Gas\_USD}\footnote{\url{https://fred.stlouisfed.org/series/MHHNGSP}}  
+
+     Średniomiesięczna cena gazu ziemnego (Henry Hub) w USD.  
+     \\
+     Uzasadnienie: Cena gazu ziemnego (podobnie) może obrazować generalne zmiany cen na rynku surowców gazowniczych (stanowi istotny komponent kosztów energetycznych i petrochemicznych)
+
+  \item \textit{EURPLN}\footnote{\url{https://stooq.pl/q/?s=eurpln}}  
+
+     Średniomiesięczny kurs wymiany euro względem złotego.  
+     \\
+     Uzasadnienie: W przypadku eksportu paliwa na rynki europejskie warto uwzględnić zmiany kursów EUR/PLN jako czynnika wpływającego na zmiany cen akcji
+     
+  \item \textit{USDPLN}\footnote{\url{https://stooq.pl/q/?s=usdpln}}  
+
+     Średniomiesięczny kurs wymiany dolara amerykańskiego względem złotego.  
+     \\
+     Uzasadnienie: z drugiej strony, pozyskanie surowców z różnorodnych rynków często nominowane jest w dolarach amerykańskich, dlatego uwzględniono ten czynnik w analizie
+     
+
+  \item \textit{WIG\_Close}\footnote{\url{https://stooq.pl/q/?s=wig}}  
+
+     Wartość indeksu WIG na koniec miesiąca.  
+     \\
+     Uzasadnienie: indeks giełdowy odzwierciedla ogólny sentyment inwestorów na polskim rynku oraz generalną kondycje rynku 
+
+  \item \textit{ref, lom, red}\footnote{\url{https://www.nbp.pl/home.aspx?f=/dzienne/stopy_archiwum.htm}, }  
+
+     Podstawowe stopy procentowe Banku Centralnego (referencyjna, lombardowa, redyskontowa)
+     \\
+     Uzasadnienie: stopy procentowa NBP odzwierciedlają ogólny kierunek i intensywność polityki monetarnej, która wpływa na wszystkie kosztowo-finansowe aspekty funkcjonowania przedsiębiorstw oraz na zachowania inwestorów.  
+  
+  \item \textit{IP\_manuf}\footnote{\url{https://ec.europa.eu/eurostat/databrowser/view/sts_inpr_m/default/table}}  
+
+     Indeks produkcji przemysłowej w przetwórstwie (Indeks 2015 = 100).  
+     \\
+     Uzasadnienie: poziom produkcji w przetwórstwie wpływa na popyt na produkty rafineryjne i petrochemiczne – jest istotnym wskaźnikiem koniunktury sektorowej.  
+
+  \newpage
+  \item \textit{Unemp}\footnote{\url{https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table}}  
+
+     Miesięczna stopa bezrobocia (bez korekty sezonowej).  
+     \\
+     Uzasadnienie: ogólny miernik warunków makroekonomicznych i siły nabywczej konsumentów  
+
+  \item \textit{CPI\_index}\footnote{\url{https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_midx/default/table}}  
+
+     Indeks cen towarów i usług konsumpcyjnych (Indeks 2015 = 100).  
+     \\
+     Uzasadnienie: zmiany inflacji wpływają na koszty operacyjne i realną siłę nabywczą; uwzględnienie krótkookresowych odchyleń CPI pozwala wychwycić wpływ nagłych skoków cen.  
+\end{itemize}
+
+\section{Przegląd zmiennych}
+\subsection*{Wizualizacje zmiennych}
+
+\noindent
+Przegląd zmiennych warto rozpocząć od zwrócenia uwagi na zmienną objaśnianą - cenę akcji PKN Orlen S.A
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{wykres1.png}
+    \caption{Wykres zmian poszczególnych zmiennych}
+    \label{fig:brent_pkn}
+    \vspace{0.1cm}
+    {\parbox[t]{\linewidth}{\raggedright Źródło: Opracowanie własne}}
+
+\end{figure}
+Na Rysunku~\ref{fig:brent_pkn} w panelu górnym pokazano miesięczną cenę ropy Brent (linia czerwona) oraz kurs zamknięcia akcji PKN Orlen (linia niebieska). W panelu dolnym uwzględniono kursy EUR/PLN (czerwona), USD/PLN (zielona) oraz cenę gazu Henry Hub (niebieska). Obserwowalne są korelacje zmian pomiędzy zmiennymi objaśniającymi w modelu, dlatego dalsza analiza uwzględni również korelacje pomiędzy zmiennymi. Ponadto, Wykres wyraźnie wskazuje, że cena gazu ziemnego cechuje się dużą dynamiką zmian cen, co sugeruje dodanie nowych zmiennych egzogenicznych, które "obsłużą" dużą wariancję cen w przypadku tych okresów. Spośród tych właśnie okresów, wyróżniono cztery główne epizody gwałtownych wahań:
+\begin{itemize}
+  \item \textit{D\_Crisis2008} (styczeń 2008–grudzień 2009),
+  \item \textit{D\_Shock2014\_16} (lipiec 2014–czerwiec 2016),
+  \item \textit{D\_COVID2020} (marzec 2020–grudzień 2020),
+  \item \textit{D\_War2022} (luty 2022–grudzień 2022).
+\end{itemize} 
+
+W następnej kolejności sprawdzono zmienne makroekonomiczne takie jak wskaźnik \textit{produkcji przemysłowej}, \textit{stopa bezrobocia} oraz \textit{Consumer Price Index} 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{wykres2.png}
+    \caption{Wykres zmian poszczególnych zmiennych}
+    \label{fig:cpi_ip_undemp}
+    \vspace{0.1cm}
+    {\parbox[t]{\linewidth}{\raggedright Źródło: Opracowanie własne}}
+
+\end{figure}
+
+Wykres jasno wskazuje na to, że stopa bezrobocia nie jest czynnikiem różnicującym cenę zamknięcia akcji PKN Orlen S.A. Z drugiej strony CPI oraz produkcja przemysłowa okazały się istotnymi zmiennymi, które mogą różnicować cenę akcji. Ponadto, warto również zwrócić uwagę na rozrzut danych wraz ze zwiększaniem się ceny akcji zamknięcia, który wyraźnie wskazuje heteroskedastyczność danych w przypadku obu pozostałych zmiennych. Implikuje to konieczne sprawdzenie tej przesłanki po zbudowaniu modelu ekonometrycznego by zobaczyć, czy składnik losowy również będzie heteroskedastyczny.
+
+Ostatecznie stworzono panel ostatnich zmiennych, które określają ogólną kondycję rynkową (Rysunek ~\ref{fig:WIG}). Cena zamknięcia WIG, która również jest bardzo zróżnicowana, wykazuje ewidentną tendencję wzrostową. Ponadto, podobne okresy już dodane jako zmienne binarne wcześniej, cechują się dużym zróżnicowaniem wartości. W przypadku stóp procentowych, postanowiono o pozostawieniu tylko stopy referencyjnej, gdyż jest to naistotniejsza stopa w kontekście rozwiązywanego problemu, a reszta stóp zachowuje sie proporcjonalnie do niej. Ewidentnie widoczny jest znaczny spadek wysokości stóp procenowych, które są do siebie proporcjonalne, w okresie pomiędzy latami 2000-2003. W kolejnych latach, stopy utrzymywały podobny poziom, aż do okresu Wojny na Ukrainie (rok 2022), kiedy to stopy procentowe wróciły do poziomy sprzed 20 lat.  
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{wykres3.png}
+    \caption{Wykres zmian poszczególnych zmiennych}
+    \label{fig:WIG}
+    \vspace{0.1cm}
+    {\parbox[t]{\linewidth}{\raggedright Źródło: Opracowanie własne}}
+
+\end{figure}
+
+
+
+\subsection*{Macierz autokorelacji}
+
+W celu wstępnego zbadania potencjalnych zależności czasowych pomiędzy zmiennymi, przeanalizowano macierz korelacji Pearsona, w której zestawiono wartości każdej zmiennej z okresu $t$ z odpowiadającą jej wartością w okresie $t-1$. Wyniki przedstawiono na Rysunku~\ref{fig:correlation}.
+
+Na podstawie analizy można zauważyc, że zmienne są dość silnie skorelowane ze sobą,co dodatkowo sugeruje wykonanie odpowiednich testów diagnostycznych w późniejszych etapach analizy. Przykłądowo zmienna objaśniana 
+\textit{PKN.WA.Close} wykazuje bardzo wysoką korelację z własnymi wartościami opóźnionymi ($\rho = 0{,}98$), co wskazuje na dużą bezwładność notowań giełdowych spółki w czasie. Podobne zależności obserwuje się w przypadku indeksu \textit{WIG\_Close} ($\rho = 0{,}99$) oraz zmiennych makroekonomicznych, takich jak \textit{ref} ($\rho = 1{,}00$) i \textit{IP\_manuf} ($\rho = 0{,}98$). Tego rodzaju analiza dostarcza przesłanek do dalszego testowania obecności autokorelacji oraz ewentualnego doboru odpowiednich transformacji zmiennych w modelach regresyjnych, np. przez uwzględnienie opóźnień lub różnicowanie.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{macierz_korelacji.png}
+    \caption{Macierz korelacji zmiennych}
+    \label{fig:correlation}
+    \vspace{0.1cm}
+    {\parbox[t]{\linewidth}{\raggedright Źródło: Opracowanie własne}}
+
+\end{figure}
+
+
+\section{Testy i Transformacje zmiennych}
+\subsection*{Transformacja}
+
+
+
+W celu poprawy spełnienia założeń klasycznego modelu regresji liniowej, takich jak liniowość relacji, stałość wariancji oraz normalność rozkładu reszt, zastosowano transformację Boxa-Coxa dla wszystkich zmiennych ciągłych. Metoda ta pozwala dobrać odpowiednią funkcję potęgową (zależną od parametru $\lambda$), która stabilizuje wariancję i może przybliżyć rozkład zmiennej do normalnego:
+
+Transformacja Boxa-Coxa dla zmiennej $Y$ definiowana jest następująco:
+
+\[
+Y^{(\lambda)} =
+\begin{cases}
+\displaystyle \frac{Y^\lambda - 1}{\lambda}, & \text{dla } \lambda \neq 0 \\
+\log(Y), & \text{dla } \lambda = 0
+\end{cases}
+\]
+
+Parametr $\lambda$ został oszacowany osobno dla każdej zmiennej, a jego optymalna wartość została przedstawiona w Tabeli~\ref{tab:boxcox_lambda}. Zmiennym, dla których $\lambda$ było bliskie zeru (tj. $|\lambda| < 0{,}30$), przypisano transformację logarytmiczną – odpowiadającą klasycznemu przypadkowi Boxa-Coxa przy $\lambda = 0$. Ze względu na przejrzystość analizy, nie zastosowano innego rodzaju transformacji, tak aby móc jasno interpretować wpływ poszczególnych zmiennych w dalszej części analizy. Ostatecznie transformacji poddano 4 zmienne, które są zaprezentowane w tabeli:
+
+\begin{table}[H]
+\centering
+\caption{Optymalne wartości parametru $\lambda$ w transformacji Boxa-Coxa oraz zastosowanie transformacji}
+\label{tab:boxcox_lambda}
+\renewcommand{\arraystretch}{1.3} % zwiększa wysokość wierszy
+\begin{tabular}{lccc}
+\toprule
+\textbf{Zmienna} & \textbf{$\lambda$ optymalne} & \textbf{Zastosowana transformacja} & \textbf{Opis ekonomiczny} \\
+\midrule
+Brent\_USD      & $-0{,}18$ & $\log(\text{Brent\_USD})$      & Cena ropy Brent  \\
+Gas\_USD        & $-0{,}26$ & $\log(\text{Gas\_USD})$        & Cena gazu ziemnego \\
+PKN.WA.Close    & $0{,}08$  & $\log(\text{PKN.WA.Close})$    & Kurs akcji PKN Orlen \\
+WIG\_Close      & $0{,}46$  & brak                           & Indeks giełdowy WIG \\
+EURPLN         & $1{,}62$  & brak                           & Kurs EUR/PLN \\
+USDPLN         & $1{,}64$  & brak                           & Kurs USD/PLN \\
+IP\_manuf      & $-0{,}02$ & $\log(\text{IP\_manuf})$       & Produkcja przemysłowa \\
+CPI\_index     & $-1{,}00$ & brak                           & Indeks cen konsumpcyjnych \\
+ref            & $0{,}66$  & brak                           & Stopa referencyjna \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Stacjonarność}
+
+\begin{table}[H]
+\centering
+\caption{Liczba wymaganych różnic do osiągnięcia stacjonarności}
+\label{tab:diffs_required}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Zmienna} & \textbf{Różnicowanie $d$} & \textbf{Różnicowanie sezonowe $D$} \\
+\midrule
+PKN.WA.Close     & 1 & 0 \\
+Brent\_USD       & 1 & 0 \\
+EURPLN           & 1 & 0 \\
+Gas\_USD         & 1 & 0 \\
+ref              & 2 & 0 \\
+USDPLN           & 1 & 0 \\
+WIG\_Close       & 1 & 0 \\
+IP\_manuf        & 1 & 1 \\
+CPI\_index       & 2 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Przed przystąpieniem do modelowania, zgodnie z klasycznymi założeniami analizy szeregów czasowych oraz ekonometrii czasowej, zweryfikowano stacjonarność wszystkich zmiennych za pomocą dwóch komplementarnych testów: testu Dickeya-Fullera (ADF) oraz testu KPSS. Wyniki testów stacjonarności wskazały, że wszystkie analizowane zmienne w poziomie są niestacjonarne. W związku z tym określono liczbę wymaganych różnic (zwykłych i sezonowych), niezbędnych do uzyskania stacjonarności każdej ze zmiennych. Podsumowanie przedstawiono w Tabeli~\ref{tab:diffs_required}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{seasonal_plot.png}
+    \caption{Wykres sezonowości zmiennych}
+    \label{fig:seasonal}
+    \vspace{0.1cm}
+    {\parbox[t]{\linewidth}{\raggedright Źródło: Opracowanie własne}}
+
+\end{figure}
+
+
+Dla większości zmiennych wystarczyło pierwsze różnicowanie ($d = 1$), natomiast w przypadku zmiennej \textit{ref} oraz \textit{CPI\_index} konieczne było drugie różnicowanie ($d = 2$). Zmienna \textit{IP\_manuf} została dodatkowo poddana sezonowemu różnicowaniu z okresem 12 miesięcy ($D = 1$), co wynikało z występowania wyraźnej sezonowości w danych. Ponieważ, pewne testy wskazywały również na niestacjonarność zmiennej \textit{Consumer Price Index}, postanowiono o zweryfikowaniu tego wizualnie. Wyniki wskazują na błędy tamtego testu, gdyż różnice (w szczególności przy uwzględnieniu skali), nie są różnicowane znacznie ze względu na miesiąc co przedstawiono na rysunku ~\ref{fig:seasonal}.
+
+
+\newpage
+\section{Budowanie modeli}
+
+\subsection*{Pełny model ekonometryczny}
+
+W celu wybrania odpowiedniego modelu ekonometrycznego regresji liniowej, po transformacji i różnicowaniu zmiennych, rozpoczęto proces oszacowywania logarytmicznych zwrotów akcji PKN ORLEN S.A. Pełna struktura modelu prezentuje się w sposób następujący:
+
+\begin{equation}
+\begin{split}
+\Delta \ln(\text{PKN}_{t}) =\;& \beta_{0}
++ \beta_{1}\,\Delta \text{EURPLN}_{t}
++ \beta_{2}\,\Delta \text{USDPLN}_{t}
++ \beta_{3}\,\Delta \text{WIG}_{t}\\
+&+ \beta_{4}\,\Delta \ln(\text{Brent}_{t})
++ \beta_{5}\,\Delta \ln(\text{Gas}_{t})
++ \beta_{6}\,\Delta \text{ref}_{t}\\
+&+ \beta_{7}\,\Delta \ln(\text{IP}_{t})
++ \beta_{8}\,\Delta \text{CPI}_{t}
++ \gamma_{1}D_{\text{Crisis2008},t}\\
+&+ \gamma_{2}D_{\text{Shock2014\_16},t}
++ \gamma_{3}D_{\text{COVID2020},t}
++ \gamma_{4}D_{\text{War2022},t}
++ \varepsilon_{t},
+\end{split}
+\label{eq:full_model}
+\end{equation}
+
+
+\begin{table}[ht]
+  \centering
+  \caption{Estymacja pełnego modelu}
+  \label{tab:full_model_simple}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Zmienna & Estymator & Błąd std. & $t$ & $p$-value & \\
+    \midrule
+    (Intercept)               & -0,003465 & 0,004443 & -0,780  & 0,4362 & \\
+    $\Delta$ EUR/PLN         & -0,1154   & 0,05753  & -2,005  & 0,0460$^{\quad*}$ & \\
+    $\Delta$ USD/PLN         &  0,1058   & 0,04500  &  2,352  & 0,0194$^{\quad*}$ & \\
+    $\Delta$ WIG             &  0,000026 & 0,000002 & 14,336  & $<$2e-16$^{\quad***}$ & \\
+    $\Delta\ln(\mathrm{Brent})$ & -0,02985 & 0,04584  & -0,651  & 0,5155 & \\
+    $\Delta\ln(\mathrm{Gas})$ & 0,04681 & 0,02693 & 1,738 & 0,0833$^{\quad.}$ \\
+    $\Delta\,\mathrm{ref}$      & -0,02579 & 0,01279  & -2,017  & 0,0447$^{\quad*}$ & \\
+    $\Delta\ln(\mathrm{IP})$    &  0,01600 & 0,06122  &  0,261  & 0,7940 & \\
+    $\Delta\,\mathrm{CPI}$      & -0,01246 & 0,008543 & -1,459  & 0,1458 & \\
+    $D_{\mathrm{Crisis2008}}$    &  0,003418 & 0,01369  &  0,250  & 0,8030 & \\
+    $D_{\mathrm{Shock2014\_16}}$ &  0,03012 & 0,01379  &  2,184  & 0,0298$^{\quad*}$ & \\
+    $D_{\mathrm{COVID2020}}$     & -0,01567 & 0,02055  & -0,763  & 0,4462 & \\
+    $D_{\mathrm{War2022}}$       &  0,01217 & 0,01965  &  0,619  & 0,5364 & \\
+    \midrule
+    \multicolumn{6}{l}{Residual Std.\ Error: 0,06298 on 263 DF} \\
+    \multicolumn{6}{l}{Multiple R$^2$: 0,5298,\quad Adjusted R$^2$: 0,5084} \\
+    \multicolumn{6}{l}{F-statistic: 24,7 on 12 and 263 DF (p < 2,2e-16)} \\
+    \multicolumn{6}{l}{AIC: -728,29} \\
+    \bottomrule
+  \end{tabular}
+  \begin{tablenotes}
+    \small
+    \item Uwagi: $^{***}p<0{,}001$, $^{**}p<0{,}01$, $^{*}p<0{,}05$, $^\textbf{.}p<0{,}1$.
+  \end{tablenotes}
+\end{table}
+
+Oszacowania pełnego modelu ekonometrycznego wskazują na istotną statystyczność 5 zmiennych na poziomie 0,05 oraz 6 zmiennych, jeżeli za próg istotności statystycznej przyjmiemy 0,1. W następnej kolejności zdecydowano o usunięciu zmiennych nieistotnych, tak aby móc sprawdzić, czy redukcja modelu może wpłynąć na poprawe oszacowań oraz dopasowania. 
+
+\newpage
+\subsection*{Zredukowany model ekonometryczny}
+
+Na podstawie wyników pełnego modelu usunięto zmienne nieistotne statystycznie (na poziomie 0,1), pozostawiając te o istotnym wpływie na logarytmiczne stopy zwrotu z akcji PKN Orlen. Ostateczny, zredukowany model ma postać:
+
+\begin{equation}
+\Delta \ln(\text{PKN}_{t}) = \beta_{0}
++ \beta_{1}\,\Delta \text{USDPLN}_{t}
++ \beta_{2}\,\Delta \text{EURPLN}_{t}
++ \beta_{3}\,\Delta \mathrm{WIG}_{t}
++ \beta_{4}\,\Delta\,\mathrm{ref}_{t}
++ \gamma\,D_{\text{Shock2014\_16},t}
++ \delta\,\Delta \ln(\mathrm{Gas}_{t})
++ \varepsilon_{t},
+\label{eq:reduced_model}
+\end{equation}
+
+
+gdzie oznaczenia są takie same jak we wzorze \eqref{eq:full_model}.
+
+\begin{table}[ht]
+  \centering
+  \caption{Estymacja zredukowanego modelu}
+  \label{tab:reduced_model}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Zmienna & Estymator & Błąd std. & $t$ & $p$-value & \\
+    \midrule
+    (Intercept)               & -0,003248 & 0,003986 & -0,815  & 0,4159 & \\
+    $\Delta$ USD/PLN         &  0,1079   & 0,04449  &  2,425  & 0,0159$^{\quad*}$ & \\
+    $\Delta$ EUR/PLN         & -0,1200   & 0,05690  & -2,110  & 0,0358$^{\quad*}$ & \\
+    $\Delta$ WIG             &  0,000025 & 0,000002 & 14,506  & $<$2e-16$^{\quad***}$ & \\
+    $\Delta\,\mathrm{ref}$      & -0,02824 & 0,01237  & -2,282  & 0,0232$^{\quad*}$ & \\
+    $D_{\mathrm{Shock2014\_16}}$ &  0,03060 & 0,01351  &  2,266  & 0,0243$^{\quad*}$ & \\
+    $\Delta\ln(\mathrm{Gas})$   &  0,04503 & 0,02609  &  1,726  & 0,0855$^{\quad.}$ & \\
+    \midrule
+    \multicolumn{6}{l}{Residual Std.\ Error: 0,06276 on 269 DF} \\
+    \multicolumn{6}{l}{Multiple R$^2$: 0,5225,\quad Adjusted R$^2$: 0,5119} \\
+    \multicolumn{6}{l}{F-statistic: 49,06 on 6 and 269 DF (p < 2,2e-16)} \\
+    \multicolumn{6}{l}{AIC: -736,02} \\
+    \bottomrule
+  \end{tabular}
+  \begin{tablenotes}
+    \small
+    \item Uwagi: $^{***}p<0{,}001$, $^{**}p<0{,}01$, $^{*}p<0{,}05$, $^{.}p<0{,}1$.
+  \end{tablenotes}
+\end{table}
+
+
+Model oszacowuje istotność statystyczną wszystkich zmiennych z wyjątkiem wyrazu wolnego. Model cechuje się lepszym dopasowaniem \textit{Adjusted R$^2$}, co sugeruje, że redukcja zmiennych przyczyniła się do lepszej interpretowalności parametrów. Poprawiło się również kryterium \textit{AIC}, gdzie niższa wartość oznacza lepsze dopasowanie.
+
+\subsection*{Zoptymalizowany model pod względem kryterium AIC}
+Ostateczny model uzyskany przez procedurę krokową minimalizującą wartość AIC ma postać:
+
+\begin{equation}
+\begin{split}
+\Delta \ln(\text{PKN}_{t}) =\;& \beta_{0}
++ \beta_{1}\,\Delta \text{EURPLN}_{t}
++ \beta_{2}\,\Delta \text{USDPLN}_{t}
++ \beta_{3}\,\Delta \text{WIG}_{t}\\[6pt]
+&+ \beta_{4}\,\Delta \ln(\text{Gas}_{t})
++ \beta_{5}\,\Delta \text{ref}_{t}
++ \beta_{6}\,\Delta \text{CPI}_{t}
++ \gamma\,D_{\text{Shock2014\_16},t}
++ \varepsilon_{t},
+\end{split}
+\label{eq:aic_model}
+\end{equation}
+
+
+
+\newpage
+A tak prezentowała się tabela oszacowań parametrów:
+\begin{table}[ht]
+  \centering
+  \caption{Estymacja modelu AIC-optymalnego}
+  \label{tab:aic_model}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Zmienna & Estymator & Błąd std. & $t$ & $p$-value & \\
+    \midrule
+    (Intercept)               & -0,003328 & 0,003974 & -0,838  & 0,4030 & \\
+    $\Delta$ EUR/PLN         & -0,1179   & 0,05673  & -2,079  & 0,0386$^{\quad*}$  & \\
+    $\Delta$ USD/PLN         &  0,1080   & 0,04435  &  2,434  & 0,0156$^{\quad*}$  & \\
+    $\Delta$ WIG             &  0,000025 & 0,000002 & 14,642  & $<$2e-16$^{\quad***}$ & \\
+    $\Delta\ln(\mathrm{Gas})$ & 0,04228  & 0,02607  & 1,622   & 0,1060       & \\
+    $\Delta\,\mathrm{ref}$      & -0,02748 & 0,01234  & -2,226  & 0,0268$^{\quad*}$  & \\
+    $\Delta\,\mathrm{CPI}$      & -0,01358 & 0,00830  & -1,637  & 0,1029       & \\
+    $D_{\mathrm{Shock2014\_16}}$ & 0,03074  & 0,01347  & 2,283   & 0,0232$^{\quad*}$  & \\
+    \midrule
+    \multicolumn{6}{l}{Residual Std.\ Error: 0,06256 (268 DF)} \\
+    \multicolumn{6}{l}{Multiple R$^2$ = 0,5272,\quad Adjusted R$^2$ = 0,5149} \\
+    \multicolumn{6}{l}{F-statistic: 42,70 on 7 and 268 DF (p < 2,2e-16)} \\
+    \multicolumn{6}{l}{AIC: -736,76} \\
+    \bottomrule
+  \end{tabular}
+  \begin{tablenotes}
+    \small
+    \item Uwagi: $^{***}p<0{,}001$, $^{*}p<0{,}05$.
+  \end{tablenotes}
+\end{table}
+
+W modelu AIC-optymalnym pozostała tylko jedna zmienna binarna oznaczająca epizod rynkowy — \textit{Shock2014\_16}. Pozostałe trzy epizody, mimo wcześniejszego uwzględnienia w modelu pełnym (\textit{Crisis2008}, \textit{COVID2020}, \textit{War2022}), zostały usunięte przez procedurę stepwise. Oznacza to, że nie poprawiały one wartości kryterium AIC i nie wykazywały istotnego wpływu na zmienność zwrotów z akcji PKN Orlen w obecności pozostałych zmiennych objaśniających. Z punktu widzenia konstrukcji modelu, ich odrzucenie jest zgodne z celem minimalizacji błędu ogólnego i sugeruje, że po uwzględnieniu zmiennych ciągłych (takich jak ceny surowców, kursy walut czy indeksy), ich informacyjna wartość była marginalna.
+
+\subsection*{Wnioski}
+
+Poniższa tabela zestawia kluczowe miary jakości dopasowania trzech modeli: pełnego, zredukowanego (usunięte zmienne nieistotne przy $p<0{,}1$) oraz optymalnego pod względem AIC.
+
+\begin{table}[ht]
+  \centering
+  \caption{Porównanie modeli: pełny vs.\ zredukowany vs.\ AIC-optymalny}
+  \label{tab:model_comparison}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{lccc}
+    \toprule
+    Miara & Pełny model & Zredukowany model & AIC-optymalny model \\
+    \midrule
+    Liczba parametrów (łącznie z interceptem) & 13 & 7   & 8    \\
+    Adjusted $R^2$                         & 0,5084      & 0,5119     & 0,5149  \\
+    AIC                                    & \,-728,29   & \,-736,02  & \,-736,76\\
+    \bottomrule
+  \end{tabular}%
+  }
+\end{table}
+
+\noindent Zestawienie wskazuje, że:
+\begin{itemize}
+  \item Model zredukowany (7 regresorów) już poprawia skorygowany współczynnik determinacji w porównaniu z pełnym (0,5119 vs.\ 0,5084) i jednocześnie obniża wartość AIC o \(\approx7{,}7\) pkt.
+  \item Dodanie zmiennej CPI do modelu AIC-optymalnego przyniosło dalszą, choć niewielką, poprawę obu wskaźników (Adjusted \(R^2 = 0,5149\), AIC = –736,76), kosztem jednego dodatkowego parametru.
+  \item Najlepszym kompromisem między prostotą a jakością dopasowania jest więc model AIC-optymalny: dysponuje jednym parametrem więcej niż wersja zredukowana, ale osiąga najwyższy Adjusted \(R^2\) i najniższe AIC.
+\end{itemize}
+
+W świetle powyższych wyników rekomendujemy przyjęcie modelu \eqref{eq:aic_model} jako ostatecznego narzędzia do analizy krótkoterminowych zwrotów z akcji PKN Orlen.
+
+\section{Testy na ostatecznym modelu}
+
+\subsection*{Autokorelacja reszt}
+\label{sec:autokorelacja}
+
+Aby sprawdzić, czy reszty modelu nie wykazują autokorelacji, przeprowadzono następujące testy:
+
+\begin{itemize}
+  \item \textbf{Durbin–Watson}:
+    \[
+      DW = 2.0106,\quad p = 0.5289
+    \]
+    Statystyka bliska 2 oraz wysokie \(p\)-value wskazują na brak autokorelacji pierwszego rzędu.
+
+  \item \textbf{Breusch–Godfrey} (do rzędu 4):
+    \[
+      LM = 5.2692,\; df = 4,\quad p = 0.2608
+    \]
+    Brak istotnej autokorelacji reszt do czwartego rzędu.
+
+  \item \textbf{Wykresy ACF i PACF reszt} (Rysunek ~\ref{fig:acf}):
+    \begin{itemize}
+      \item Żadne odległe opóźnienie (lag) poza zerowym nie przekracza granicy istotności.
+      \item Nie obserwuje się uporczywych wzorców ani malejących „ogonów” sugerujących autokorelację.
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{acf.png}
+    \caption{Autokorelacja reszt}
+    \label{fig:acf}
+    \vspace{0.1cm}
+    {\parbox[t]{\linewidth}{\raggedright Źródło: Opracowanie własne}}
+
+\end{figure}
+
+\noindent
+Podsumowując, zarówno testy statystyczne, jak i diagnostyka graficzna nie ujawniają obecności autokorelacji w resztach, co potwierdza spełnienie jednego z kluczowych założeń modelu liniowego.
+
+
+\subsection*{Normalność rozkładu reszt}
+
+
+Aby zweryfikować założenie normalności rozkładu reszt, przeprowadzono:
+
+\begin{itemize}
+  \item \textbf{Test Jarque–Bera}:
+    \[
+      JB = 0.2352,\quad df = 2,\quad p = 0.889
+    \]
+    Wysokie \(p\)-value oznacza brak podstaw do odrzucenia hipotezy o normalności reszt.
+
+  \item \textbf{Diagnostyka graficzna}:
+    \begin{enumerate}
+      \item \textbf{Histogram reszt} (Rysunek~\ref{fig:hist_QQ}) – rozkład zbliżony do symetrycznego dzwonu.
+      \item \textbf{Wykres Q–Q} (Rysunek~\ref{fig:hist_QQ}) – większość punktów leży blisko linii przekątnej, co sugeruje zgodność z rozkładem normalnym.
+    \end{enumerate}
+\end{itemize}
+
+\noindent
+Wnioski: zarówno test statystyczny, jak i analiza wykresów potwierdzają, że reszty modelu spełniają założenie normalności.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{hist_qqplot.png}
+    \caption{Histogram oraz QQ Plot}
+    \label{fig:hist_QQ}
+    \vspace{0.1cm}
+    {\parbox[t]{\linewidth}{\raggedright Źródło: Opracowanie własne}}
+
+\end{figure}
+
+
+\subsection*{Współliniowość zmiennych objaśniających}
+\label{sec:wspolliniowosc}
+
+Dla oceny współliniowości obliczono wskaźniki VIF (Variance Inflation Factor) dla każdej zmiennej objaśniającej:
+
+\[
+\begin{aligned}
+  \mathrm{VIF}_{d\_EURPLN} &= 2.147, \\
+  \mathrm{VIF}_{d\_USDPLN} &= 2.310, \\
+  \mathrm{VIF}_{d\_WIG\_Close} &= 1.418, \\
+  \mathrm{VIF}_{d\_Gas\_USD\_log} &= 1.027, \\
+  \mathrm{VIF}_{d\_ref} &= 1.008, \\
+  \mathrm{VIF}_{d\_CPI\_index} &= 1.019, \\
+  \mathrm{VIF}_{D\_Shock2014\_16} &= 1.015.
+\end{aligned}
+\]
+
+Wszystkie uzyskane wartości VIF są znacznie poniżej powszechnie przyjmowanego progu (Próg krytyczny = 5), co wskazuje na brak istotnej współliniowości między zmiennymi objaśniającymi. Dzięki temu model nie wymaga poprawy specyfikacji zmiennych, ich eliminacji lub też kolejnych transformacji z powodu nadmiernej korelacji.
+
+\subsection*{Heteroskedastyczność}
+\label{sec:efektywnosc_hetero}
+
+Zgodnie z twierdzeniem Gaussa–Markowa, przy homoskedastyczności reszt estymatory OLS są \emph{BLUE} (Best Linear Unbiased Estimators), czyli nieobciążone i o najmniejszej wariancji w klasie estymatorów liniowych. W razie wystąpienia heteroskedastyczności estymatory pozostają nieobciążone, ale tracą efektywność.
+
+Aby sprawdzić, czy w zoptymalizowanym modelu nie zachodzi heteroskedastyczność, wykonano następujące testy:
+
+\begin{itemize}
+  \item \textbf{Breusch–Pagana}:
+    \[
+      BP = 6.2792,\quad df = 7,\quad p = 0.5076
+    \]
+  \item \textbf{Goldfeld–Quandt} (dzielenie danych na 20\% obserwacji o najniższych i najwyższych wartościach dopasowanych):
+    \[
+      GQ = 1.2324,\quad df_1 = 103,\quad df_2 = 102,\quad p = 0.1460
+    \]
+\item \textbf{White’s test} (uproszczona wersja testu Breuscha–Pagana, wykorzystująca wartość dopasowaną \(\hat{y}\) i jej kwadrat):
+\[
+  BP = 4.4839,\quad df = 2,\quad p = 0.1063
+\]
+\textit{Uwaga: zastosowano uproszczony wariant testu White’a, oparty jedynie na funkcji dopasowanej i jej kwadracie. Stąd liczba stopni swobody wynosi 2, a nie tyle, ile wskazywałby pełny test z uwzględnieniem wszystkich regresorów, ich kwadratów oraz interakcji.}
+
+  \item \textbf{NCV Test} (Non‐constant Variance Score Test):
+    \[
+      \chi^2 = 0.09995,\quad df = 1,\quad p = 0.7519
+    \]
+\end{itemize}
+
+\noindent
+We wszystkich testach \(p>0.05\), co oznacza brak podstaw do odrzucenia hipotezy o homoskedastyczności reszt. W połączeniu z brakiem wzorca „lejka” na wykresie reszt vs.\ wartości dopasowane, potwierdza to spełnienie założenia stałej wariancji. W konsekwencji estymatory OLS w naszym modelu zachowują efektywność i pozostają BLUE.
+
+
+\section{Interpretacja zmiennych ostatecznego modelu}
+Ostateczny model (równanie \ref{eq:aic_model}) opisuje miesięczne zmiany logarytmicznych stóp zwrotu z akcji PKN Orlen jako funkcję sześciu regresorów i jednej zmiennej zero-jedynkowej. Poniżej interpretacja poszczególnych parametrów (estymacje z Tabeli~\ref{tab:aic_model}):
+
+\begin{itemize}
+  \item \textbf{Stała (Intercept = –0,003328, p=0,4030)}  
+    Wartość wyrazu wolnego nie jest statystycznie istotna ($p>0{,}05$), co oznacza, że przy zerowych zmianach wszystkich regresorów model nie wyróżnia jednoznacznego średniego zwrotu.
+
+  \item \(\Delta\) \textbf{EUR/PLN (–0,1179, p=0,0386)}  
+    Wzrost średniomiesięcznego kursu euro o 1\% (względem złotego) wiąże się ze spadkiem miesięcznej stopy zwrotu PKN Orlen o około 0,12 pkt proc. Interpretacja ekonomiczna: osłabienie złotego względem euro podnosi koszty importu surowców denominowanych w euro i obniża marże rafineryjne, co negatywnie przekłada się na wycenę akcji.
+
+  \item \(\Delta\) \textbf{USD/PLN (0{,}1080, p=0{,}0156)}  
+Wzrost kursu dolara względem złotego o 1\,\% prowadzi średnio do wzrostu miesięcznego zwrotu z akcji o około 0{,}11 pkt proc. Z ekonomicznego punktu widzenia efekt ten może wynikać z dwóch przeciwnych mechanizmów. Z jednej strony, wyższy kurs USD podnosi koszt importowanych surowców energetycznych (np. ropy i gazu), co mogłoby negatywnie wpływać na marże spółki. Z drugiej strony, wyższy USD/PLN zwiększa wartość przychodów eksportowych przeliczanych na złote oraz może poprawiać konkurencyjność cenową na rynkach zagranicznych. Wydaje się, że w analizowanym okresie przeważył efekt przychodowy, stąd dodatni i istotny wpływ tej zmiennej.
+
+
+  \item \(\Delta\) \textbf{WIG (0,000025, p<2e-16)}  
+    Wzrost indeksu WIG o 1 pkt odpowiada wzrostowi stopy zwrotu PKN Orlen o 0,000025 pkt proc. Choć współczynnik jest niewielki, jest wysoce istotny statystycznie. Oznacza to, że PKN Orlen porusza się \emph{w zgodzie} z ogólnym sentymentem na rynku: rosnące notowania całego rynku sprzyjają także akcjom Orlenu.
+
+  \item \(\Delta\ln(\mathrm{Gas})\) \textbf{(0,04228, p=0,1060)}  
+    Zmiana logarytmu ceny gazu o 1\% wiąże się z około 0,04 pkt proc.\ wzrostem zwrotu, jednak parametr nie jest istotny na poziomie 0,05. Mimo że wzrost ceny gazu może podnosić koszty produkcji paliw, częściowo przenoszony jest on na ceny końcowe, co może mieć mieszany wpływ na marże i wycenę.
+
+  \item \(\Delta\)\textbf{ref (–0,02748, p=0,0268)}  
+    Jednostkowy wzrost podstawowej stopy procentowej NBP o 1 pkt proc. prowadzi średnio do spadku stopy zwrotu z akcji o około 0,027 pkt proc. Wyższe stopy procentowe zwiększają koszt kapitału, obniżają skłonność do ryzyka inwestorów i mogą hamować konsumpcję paliw, co osłabia notowania Orlenu.
+
+  \item \(\Delta\)\textbf{CPI (–0,01358, p=0,1029)}  
+    Jednostkowy (1 pkt) wzrost miesięcznego wskaźnika inflacji wiąże się ze spadkiem zwrotu o około 0,013 pkt proc., choć parametr jest istotny jedynie na poziomie wyższym niż 10\%. Wyższa inflacja może ograniczać siłę nabywczą konsumentów i zwiększać koszty operacyjne, co negatywnie wpływa na wycenę spółki.
+
+  \item \(\mathbf{D\_Shock2014\_16}\) \textbf{(0,03074, p=0,0232)}  
+    W okresie epizodu rynkowego oznaczonego zmienną zero-jedynkową \textit{Shock2014\_16} (lipiec 2014–czerwiec 2016) średnia stopa zwrotu była wyższa o około 0,031 pkt proc. w porównaniu do okresów pozostałych. Może to odzwierciedlać relatywne korzyści cenowe PKN Orlen podczas tamtych wahań cen surowców czy zmian kursowych.
+\end{itemize}
+
+\noindent
+\textbf{Uwagi ogólne:}
+\begin{itemize}
+  \item Wszystkie istotne na poziomie 5\% zmienne mają znaki zgodne z oczekiwaniami ekonomicznymi.
+  \item Regresory walutowe (\(\Delta\) EUR/PLN, \(\Delta\) USD/PLN) oraz makroekonomiczne (\(\Delta\)\textit{ref}) pełnią rolę głównych determinant krótkoterminowych zwrotów, co potwierdza rolę polityki monetarnej i wahań kursowych w kształtowaniu notowań PKN Orlen.
+  \item Wysoka istotność \(\Delta\)WIG sygnalizuje silną zależność od sentymentu całego rynku akcyjnego.
+\end{itemize}
+
+
+\end{document}
+
