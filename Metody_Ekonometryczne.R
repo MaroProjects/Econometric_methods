@@ -6,7 +6,7 @@
 #############################################
 # Trzeba ustawić directory !!!!!!!!!!!
 getwd()
-setwd("C:/Users/marco/OneDrive/Documents/School/Metody ekonometryczne")
+setwd("")
 rm(list = ls())
 #####################################
 #                                   #
